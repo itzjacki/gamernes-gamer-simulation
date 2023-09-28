@@ -1,5 +1,9 @@
 import random
 
+simulations = 1000
+verbose = False
+
+
 def score(position: int, power_up: str):
 
   if power_up == "double_up":
@@ -29,6 +33,24 @@ games = [
   "total_war_empire", 
   "league_of_legends"
 ]
+
+people = [
+  "jakob",
+  "jorgen",
+  "tobias",
+  "william"
+]
+
+game_chosen_by = {
+  "hearthstone": "william",
+  "curve_fever": "tobias",
+  "the_sims_4": "jakob",
+  "warcraft_3": "william",
+  "poker": "jorgen",
+  "wreckfest": "tobias",
+  "total_war_empire": "jakob",
+  "league_of_legends": "jorgen"
+}
 
 win_chances = {
   "jakob":   {"hearthstone": 0.10, "curve_fever": 0.09, "the_sims_4": 0.60, "warcraft_3": 0.10, "poker": 0.25, "wreckfest": 0.30, "total_war_empire": 0.80, "league_of_legends": 0.25},
@@ -154,7 +176,7 @@ def do_turn(game: str, players: list, verbose: bool):
   if verbose:
     print("First:", first, "| Second:", second, "| Third:", third, "| Fourth:", fourth)
 
-def simulate_tournament(verbose: bool = False):
+def simulate_tournament(win_chances: dict, power_up_chances: dict, verbose: bool = False):
   players = [
     player("jakob", win_chances["jakob"], power_up_chances["jakob"]), 
     player("jorgen", win_chances["jorgen"], power_up_chances["jorgen"]), 
@@ -171,41 +193,89 @@ def simulate_tournament(verbose: bool = False):
 
   return players
 
+def simulationRun(print_results_per_simulation: bool, win_chances: dict, power_up_chances: dict, simulations: int):
+  wins = {
+    "jakob": 0,
+    "jorgen": 0,
+    "tobias": 0,
+    "william": 0
+  }
 
-simulations = 100000
-verbose = False
+  point_sums = {
+    "jakob": 0,
+    "jorgen": 0,
+    "tobias": 0,
+    "william": 0
+  }
 
-wins = {
-  "jakob": 0,
-  "jorgen": 0,
-  "tobias": 0,
-  "william": 0
-}
+  for i in range(simulations):
+    players = simulate_tournament(win_chances, power_up_chances, verbose=verbose)
+    for p in players:
+      point_sums[p.name] += p.points
+      if p.points == max([p.points for p in players]):
+        wins[p.name] += 1
 
-point_sums = {
-  "jakob": 0,
-  "jorgen": 0,
-  "tobias": 0,
-  "william": 0
-}
+  point_averges = {
+    "jakob": point_sums["jakob"] / simulations,
+    "jorgen": point_sums["jorgen"] / simulations,
+    "tobias": point_sums["tobias"] / simulations,
+    "william": point_sums["william"] / simulations
+  }
 
-for i in range(simulations):
-  players = simulate_tournament( verbose)
-  for p in players:
-    point_sums[p.name] += p.points
-    if p.points == max([p.points for p in players]):
-      wins[p.name] += 1
+  win_percentage = {
+    "jakob": str(round(wins["jakob"] / simulations * 100, 2)) + "%",
+    "jorgen": str(round(wins["jorgen"] / simulations * 100, 2)) + "%",
+    "tobias": str(round(wins["tobias"] / simulations * 100, 2)) + "%",
+    "william": str(round(wins["william"] / simulations * 100, 2)) + "%"
+  }
 
-point_averges = {
-  "jakob": point_sums["jakob"] / simulations,
-  "jorgen": point_sums["jorgen"] / simulations,
-  "tobias": point_sums["tobias"] / simulations,
-  "william": point_sums["william"] / simulations
-}
+  if print_results_per_simulation:
+    print("\n------------------------------------------\n")
+    print(simulations, "simulations completed, results:")
+    print("\nWin distribution: ")
+    print(win_percentage)
+    print("\nAverage point distribution: ")
+    print(point_averges)
 
-print("\n------------------------------------------\n")
-print(simulations, "simulations completed, results:")
-print("\nWin distribution: ")
-print(wins)
-print("\nAverage point distribution: ")
-print(point_averges)
+  return win_percentage, point_averges
+
+def optimize_power_ups(power_up_chances: dict):
+  power_up_combinations = []
+
+  # Construct list of all valid combinations of powerup choices by Jakob
+  for double_up_game in games:
+    if game_chosen_by[double_up_game] != "jakob":
+      for safety_net_game in games:
+        if game_chosen_by[safety_net_game] != "jakob":
+          for gamba_time_game in games:
+            if game_chosen_by[gamba_time_game] != "jakob":
+              for person in people:
+                if person != "jakob" and game_chosen_by[gamba_time_game] != person and len(set([double_up_game, safety_net_game, gamba_time_game])) == 3:
+                  power_up_combinations.append({"double_up": {double_up_game: 1}, "safety_net": {safety_net_game: 1}, "gamba_time": {gamba_time_game: [1, person]}})
+
+  print("Number of combinations:", len(power_up_combinations))
+
+  results = []
+  for combo in power_up_combinations:
+    if False:
+      print(combo)
+    power_up_chances = {
+      "jakob": combo,
+      "jorgen": power_up_chances["jorgen"], 
+      "tobias": power_up_chances["tobias"], 
+      "william": power_up_chances["william"]
+    }
+    run_wins, run_point_averages = simulationRun(False, win_chances, power_up_chances, simulations)
+    results.append({"win_distribution": run_wins, "point_averages": run_point_averages, "power_up_combo": combo})
+
+  sorted_results = sorted(results, key=lambda k: k['win_distribution']['jakob'], reverse=True)
+  print("Top 3 combinations:")
+  print("\n------------------------------------------\n")
+  print(sorted_results[0])
+  print("\n------------------------------------------\n")
+  print(sorted_results[1])
+  print("\n------------------------------------------\n")
+  print(sorted_results[2])
+  print("\n------------------------------------------\n")
+
+optimize_power_ups(power_up_chances)
