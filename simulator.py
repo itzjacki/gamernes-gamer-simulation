@@ -31,31 +31,31 @@ games = [
 ]
 
 win_chances = {
-  "jakob":   {"hearthstone": 0.12, "curve_fever": 0.09, "the_sims_4": 0.60, "warcraft_3": 0.20, "poker": 0.25, "wreckfest": 0.40, "total_war_empire": 0.80, "league_of_legends": 0.25},
-  "jorgen":  {"hearthstone": 0.08, "curve_fever": 0.10, "the_sims_4": 0.05, "warcraft_3": 0.15, "poker": 0.40, "wreckfest": 0.03, "total_war_empire": 0.13, "league_of_legends": 0.30},
-  "tobias":  {"hearthstone": 0.30, "curve_fever": 0.75, "the_sims_4": 0.30, "warcraft_3": 0.25, "poker": 0.20, "wreckfest": 0.50, "total_war_empire": 0.06, "league_of_legends": 0.25},
-  "william": {"hearthstone": 0.50, "curve_fever": 0.06, "the_sims_4": 0.05, "warcraft_3": 0.40, "poker": 0.15, "wreckfest": 0.07, "total_war_empire": 0.01, "league_of_legends": 0.20}
+  "jakob":   {"hearthstone": 0.10, "curve_fever": 0.09, "the_sims_4": 0.60, "warcraft_3": 0.10, "poker": 0.25, "wreckfest": 0.30, "total_war_empire": 0.80, "league_of_legends": 0.25},
+  "jorgen":  {"hearthstone": 0.10, "curve_fever": 0.10, "the_sims_4": 0.05, "warcraft_3": 0.05, "poker": 0.40, "wreckfest": 0.00, "total_war_empire": 0.13, "league_of_legends": 0.30},
+  "tobias":  {"hearthstone": 0.40, "curve_fever": 0.75, "the_sims_4": 0.30, "warcraft_3": 0.10, "poker": 0.20, "wreckfest": 0.45, "total_war_empire": 0.07, "league_of_legends": 0.25},
+  "william": {"hearthstone": 0.40, "curve_fever": 0.06, "the_sims_4": 0.05, "warcraft_3": 0.75, "poker": 0.15, "wreckfest": 0.25, "total_war_empire": 0.00, "league_of_legends": 0.20}
 }
 
 power_up_chances = {
   "jakob":{
     "double_up": {"wreckfest": 1}, 
     "safety_net": {"curve_fever": 1}, 
-    "gamba_time": {"league_of_legends": (1, "tobias")}
+    "gamba_time": {"hearthstone": (1, "tobias")}
   },
   "jorgen":{
     "double_up": {"curve_fever": 0.75, "total_war_empire": 0.25}, 
-    "safety_net": {"hearthstone": 0.6, "wreckfest": 0.4}, 
+    "safety_net": {"wreckfest": 1}, 
     "gamba_time": {"hearthstone": (0.4, "tobias"), "wreckfest": (0.6, "jakob")}
   },
   "tobias":{
-    "double_up": {"warcraft_3": 0.5, "hearthstone": 0.4, "poker": 0.1}, 
+    "double_up": {"warcraft_3": 0.2, "hearthstone": 0.7, "poker": 0.1}, 
     "safety_net": {"total_war_empire": 0.4, "poker": 0.3, "league_of_legends": 0.3}, 
-    "gamba_time": {"poker": (0.2, "jakob"), "warcraft_3": (0.2, "jakob"), "league_of_legends": (0.6, "william")}
+    "gamba_time": {"poker": (0.2, "jakob"), "hearthstone": (0.2, "jorgen"), "league_of_legends": (0.6, "william")}
   },
   "william":{
-    "double_up": {"league_of_legends": 0.9, "poker": 0.1}, 
-    "safety_net": {"total_war_empire": 0.95, "the_sim_4": 0.05}, 
+      "double_up": {"league_of_legends": 0.7, "wreckfest": 0.15, "league_of_legends": 0.15}, 
+    "safety_net": {"total_war_empire": 0.95, "the_sims_4": 0.05}, 
     "gamba_time": {"wreckfest": (0.5, "jakob"), "poker": (0.5, "tobias")}
   }
 }
@@ -172,7 +172,7 @@ def simulate_tournament(verbose: bool = False):
   return players
 
 
-simulations = 10000
+simulations = 100000
 verbose = False
 
 wins = {
