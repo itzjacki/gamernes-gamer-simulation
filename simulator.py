@@ -1,6 +1,6 @@
 import random
 
-simulations = 1000
+simulations = 5000
 verbose = False
 
 
@@ -52,11 +52,13 @@ game_chosen_by = {
   "league_of_legends": "jorgen"
 }
 
+# JAKOB
+
 win_chances = {
-  "jakob":   {"hearthstone": 0.10, "curve_fever": 0.09, "the_sims_4": 0.60, "warcraft_3": 0.10, "poker": 0.25, "wreckfest": 0.30, "total_war_empire": 0.80, "league_of_legends": 0.25},
-  "jorgen":  {"hearthstone": 0.10, "curve_fever": 0.10, "the_sims_4": 0.05, "warcraft_3": 0.05, "poker": 0.40, "wreckfest": 0.00, "total_war_empire": 0.13, "league_of_legends": 0.30},
-  "tobias":  {"hearthstone": 0.40, "curve_fever": 0.75, "the_sims_4": 0.30, "warcraft_3": 0.10, "poker": 0.20, "wreckfest": 0.45, "total_war_empire": 0.07, "league_of_legends": 0.25},
-  "william": {"hearthstone": 0.40, "curve_fever": 0.06, "the_sims_4": 0.05, "warcraft_3": 0.75, "poker": 0.15, "wreckfest": 0.25, "total_war_empire": 0.00, "league_of_legends": 0.20}
+  "jakob":   {"hearthstone": 0.17, "curve_fever": 0.06, "the_sims_4": 0.60, "warcraft_3": 0.05, "poker": 0.25, "wreckfest": 0.30, "total_war_empire": 0.80, "league_of_legends": 0.25},
+  "jorgen":  {"hearthstone": 0.17, "curve_fever": 0.05, "the_sims_4": 0.05, "warcraft_3": 0.025, "poker": 0.40, "wreckfest": 0.00, "total_war_empire": 0.10, "league_of_legends": 0.30},
+  "tobias":  {"hearthstone": 0.26, "curve_fever": 0.85, "the_sims_4": 0.30, "warcraft_3": 0.025, "poker": 0.20, "wreckfest": 0.45, "total_war_empire": 0.10, "league_of_legends": 0.25},
+  "william": {"hearthstone": 0.40, "curve_fever": 0.04, "the_sims_4": 0.05, "warcraft_3": 0.90, "poker": 0.15, "wreckfest": 0.25, "total_war_empire": 0.00, "league_of_legends": 0.20}
 }
 
 power_up_chances = {
@@ -71,9 +73,9 @@ power_up_chances = {
     "gamba_time": {"hearthstone": (0.4, "tobias"), "wreckfest": (0.6, "jakob")}
   },
   "tobias":{
-    "double_up": {"warcraft_3": 0.2, "hearthstone": 0.7, "poker": 0.1}, 
-    "safety_net": {"total_war_empire": 0.4, "poker": 0.3, "league_of_legends": 0.3}, 
-    "gamba_time": {"poker": (0.2, "jakob"), "hearthstone": (0.2, "jorgen"), "league_of_legends": (0.6, "william")}
+    "double_up": {"the_sims_4": 0.60, "hearthstone": 0.10, "total_war_empire": 0.30}, 
+    "safety_net": {"warcraft_3": 1}, 
+    "gamba_time": {"poker": (0.5, "jakob"), "league_of_legends": (0.5, "william")}
   },
   "william":{
     "double_up": {"league_of_legends": 0.7, "wreckfest": 0.15, "league_of_legends": 0.15}, 
@@ -81,6 +83,38 @@ power_up_chances = {
     "gamba_time": {"wreckfest": (0.5, "jakob"), "poker": (0.5, "tobias")}
   }
 }
+
+# TOBIAS
+
+win_chances_tobias = {
+  "jakob":   {"hearthstone": 0.20, "curve_fever": 0.12, "the_sims_4": 0.35, "warcraft_3": 0.20, "poker": 0.26, "wreckfest": 0.25, "total_war_empire": 0.40, "league_of_legends": 0.26},
+  "jorgen":  {"hearthstone": 0.25, "curve_fever": 0.12, "the_sims_4": 0.20, "warcraft_3": 0.15, "poker": 0.30, "wreckfest": 0.00, "total_war_empire": 0.33, "league_of_legends": 0.28},
+  "tobias":  {"hearthstone": 0.25, "curve_fever": 0.60, "the_sims_4": 0.30, "warcraft_3": 0.15, "poker": 0.18, "wreckfest": 0.45, "total_war_empire": 0.27, "league_of_legends": 0.18},
+  "william": {"hearthstone": 0.30, "curve_fever": 0.16, "the_sims_4": 0.15, "warcraft_3": 0.50, "poker": 0.26, "wreckfest": 0.30, "total_war_empire": 0.00, "league_of_legends": 0.28}
+}
+
+power_up_chances_tobias = {
+  "jakob":{
+    "double_up": {"poker": 1}, 
+    "safety_net": {"hearthstone": 1}, 
+    "gamba_time": {"league_of_legends": (1, "william")}
+  },
+  "jorgen":{
+    "double_up": {"hearthstone": 1}, 
+    "safety_net": {"wreckfest": 1}, 
+    "gamba_time": {"wreckfest": (1, "william")}
+  },
+  "william":{
+    "double_up": {"wreckfest": 1}, 
+    "safety_net": {"total_war_empire": 1}, 
+    "gamba_time": {"poker": (1, "jakob")}
+  }
+}
+
+# JØRGEN
+
+
+# WILLIAM
 
 class player:
   def __init__(self, name: str, win_chances: dict, power_up_chances: dict):
@@ -239,28 +273,30 @@ def simulationRun(print_results_per_simulation: bool, win_chances: dict, power_u
 
   return win_percentage, point_averges
 
-def optimize_power_ups(power_up_chances: dict):
+def optimize_power_ups(power_up_chances: dict, simulation_player: str ):
   power_up_combinations = []
 
-  # Construct list of all valid combinations of powerup choices by Jakob
+  # Construct list of all valid combinations of powerup choices by the player
   for double_up_game in games:
-    if game_chosen_by[double_up_game] != "jakob":
+    if game_chosen_by[double_up_game] != simulation_player:
       for safety_net_game in games:
-        if game_chosen_by[safety_net_game] != "jakob":
+        if game_chosen_by[safety_net_game] != simulation_player:
           for gamba_time_game in games:
-            if game_chosen_by[gamba_time_game] != "jakob":
+            if game_chosen_by[gamba_time_game] != simulation_player:
               for person in people:
-                if person != "jakob" and game_chosen_by[gamba_time_game] != person and len(set([double_up_game, safety_net_game, gamba_time_game])) == 3:
+                if person != simulation_player and game_chosen_by[gamba_time_game] != person and len(set([double_up_game, safety_net_game, gamba_time_game])) == 3:
                   power_up_combinations.append({"double_up": {double_up_game: 1}, "safety_net": {safety_net_game: 1}, "gamba_time": {gamba_time_game: [1, person]}})
 
-  print("Number of combinations:", len(power_up_combinations))
+  print("Number of combinations:", len(power_up_combinations), "\nnumber of simulations:", simulations, "\ntotal number of simulations:", len(power_up_combinations) * simulations)
 
   results = []
   for combo in power_up_combinations:
     if False:
+      # TODO fix
       print(combo)
     power_up_chances = {
-      "jakob": combo,
+      # TODO generate this dynamically based on simulation_player
+      simulation_player: combo,
       "jorgen": power_up_chances["jorgen"], 
       "tobias": power_up_chances["tobias"], 
       "william": power_up_chances["william"]
@@ -268,7 +304,7 @@ def optimize_power_ups(power_up_chances: dict):
     run_wins, run_point_averages = simulationRun(False, win_chances, power_up_chances, simulations)
     results.append({"win_distribution": run_wins, "point_averages": run_point_averages, "power_up_combo": combo})
 
-  sorted_results = sorted(results, key=lambda k: k['win_distribution']['jakob'], reverse=True)
+  sorted_results = sorted(results, key=lambda k: k['win_distribution'][simulation_player], reverse=True)
   print("Top 3 combinations:")
   print("\n------------------------------------------\n")
   print(sorted_results[0])
@@ -278,4 +314,4 @@ def optimize_power_ups(power_up_chances: dict):
   print(sorted_results[2])
   print("\n------------------------------------------\n")
 
-optimize_power_ups(power_up_chances)
+optimize_power_ups(power_up_chances, "jakob")
