@@ -76,7 +76,7 @@ power_up_chances = {
     "gamba_time": {"poker": (0.2, "jakob"), "hearthstone": (0.2, "jorgen"), "league_of_legends": (0.6, "william")}
   },
   "william":{
-      "double_up": {"league_of_legends": 0.7, "wreckfest": 0.15, "league_of_legends": 0.15}, 
+    "double_up": {"league_of_legends": 0.7, "wreckfest": 0.15, "league_of_legends": 0.15}, 
     "safety_net": {"total_war_empire": 0.95, "the_sims_4": 0.05}, 
     "gamba_time": {"wreckfest": (0.5, "jakob"), "poker": (0.5, "tobias")}
   }
