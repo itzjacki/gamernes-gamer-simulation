@@ -1,23 +1,22 @@
 import random
+import copy
 
+# CONFIG
 simulations = 100000
 verbose = False
-power_ups = False
+power_ups = True
+accounting_error_win_boost_factor = 1.1
 
 
 def score(position: int, power_up: str):
 
-  if power_up == "double_up":
-    if position == 1: return 14
-    if position == 2: return 8
-    if position == 3: return 4
-    return 2
-  
-  if power_up == "safety_net":
-    if position == 1: return 5
-    if position == 2: return 3
-    if position == 3: return 3
-    return 3
+  if power_up == "double_edged_sword":
+    if position == 1: return 15
+    if position == 2: return 9
+    if position == 3: return 5
+    if position == 4: return 1
+    return -1
+
 
   if position == 1: return 9
   if position == 2: return 6
@@ -71,42 +70,44 @@ win_chances = {
 
 power_up_chances = {
   "jakob":{
-    "double_up": {"planet_coaster": 1}, 
-    "safety_net": {"battleblock_theater": 1}, 
-    "gamba_time": {"hollow_knight": (1, "tobias")}
+    "double_edged_sword": {"planet_coaster": 1}, 
+    "accounting_error": {"world_of_warcraft": 1}
   },
   "jorgen":{
-    "double_up": {"world_of_warcraft": 1}, 
-    "safety_net": {"planet_coaster": 1}, 
-    "gamba_time": {"world_of_warcraft": (0.4, "tobias"), "planet_coaster": (0.6, "jakob")}
+    "double_edged_sword": {"war_thunder": 0.7, "jump_king": 0.3}, 
+    "accounting_error": {"world_of_warcraft": 0.5, "pummel_party": 0.5}
   },
   "tobias":{
-    "double_up": {"war_thunder": 0.5, "hollow_knight": 0.5}, 
-    "safety_net": {"geoguessr": 1}, 
-    "gamba_time": {"jump_king": (0.5, "jakob"), "hollow_knight": (0.5, "william")}
+    "double_edged_sword": {"hollow_knight": 0.5, "battleblock_theater": 0.5}, 
+    "accounting_error": {"battleblock_theater": 0.25, "world_of_warcraft": 0.25, "geoguessr": 0.25, "planet_coaster": 0.25}
   },
   "william":{
-    "double_up": {"hollow_knight": 0.7, "planet_coaster": 0.15, "hollow_knight": 0.15}, 
-    "safety_net": {"war_thunder": 1}, 
-    "gamba_time": {"planet_coaster": (0.5, "jakob"), "jump_king": (0.5, "tobias")}
+    "double_edged_sword": {"geoguessr": 0.8, "pummel_party": 0.2}, 
+    "accounting_error": {"world_of_warcraft": 0.2, "geoguessr": 0.4, "pummel_party": 0.4}
   },
   "kristin":{
-    "double_up": {"hollow_knight": 0.7, "planet_coaster": 0.15, "hollow_knight": 0.15}, 
-    "safety_net": {"war_thunder": 1}, 
-    "gamba_time": {"planet_coaster": (0.5, "jakob"), "jump_king": (0.5, "tobias")}
+    "double_edged_sword": {"jump_king": 0.7, "pummel_party": 0.15, "world_of_warcraft": 0.15}, 
+    "accounting_error": {"planet_coaster": 0.4, "pummel_party": 0.4, "world_of_warcraft": 0.2}
   }
 }
 
+crystal_ballin_win_chance = {
+  "jakob": 0.5,
+  "jorgen": 0.3,
+  "tobias": 0.5,
+  "william": 0.3,
+  "kristin": 0.5
+}
+
 class player:
-  def __init__(self, name: str, win_chances: dict, power_up_chances: dict):
+  def __init__(self, name: str, win_chances: dict, crystal_ballin_win_chance: float, power_up_chances: dict):
     self.name = name
     self.points = 0
     self.win_chances = win_chances
+    self.crystal_ballin_win_chance = crystal_ballin_win_chance
     self.power_up_chances = power_up_chances
     self.power_ups_choices = {
-      "double_up": pick_from_probabilities([(game, self.power_up_chances["double_up"][game]) for game in self.power_up_chances["double_up"]]),
-      "safety_net": pick_from_probabilities([(game, self.power_up_chances["safety_net"][game]) for game in self.power_up_chances["safety_net"]]),
-      "gamba_time": pick_gamba_power_up(self.power_up_chances["gamba_time"])
+      "double_edged_sword": pick_from_probabilities([(game, self.power_up_chances["double_edged_sword"][game]) for game in self.power_up_chances["double_edged_sword"]]),
     }
 
   def add_points(self, points: int):
@@ -128,15 +129,11 @@ def pick_gamba_power_up(gamba_power_up_chances: dict):
   player_picked = gamba_power_up_chances[game_picked][1]
   return (game_picked, player_picked)
 
-def check_gamba_points(player: player, game: str, winner, verbose: bool):
-  if power_ups and player.power_ups_choices["gamba_time"][0] == game:
+def check_crystal_ballin_points(player: player, verbose: bool):
+  if random.random() <= player.crystal_ballin_win_chance:
     if verbose:
-      print(player.name, "used gamba time on", player.power_ups_choices["gamba_time"][1])
-    gamba_target = player.power_ups_choices["gamba_time"][1]
-    if winner == gamba_target:
-      if verbose:
-        print(player.name, "won gamba time")
-      player.add_points(3)
+      print(player.name, "won crystal ballin")
+    player.add_points(3)
 
 def pick_next_best_position(game: str, players: list):
   # construct list of players with win probabilities
@@ -153,16 +150,19 @@ def pick_next_best_position(game: str, players: list):
   return winner, players
 
 def check_if_power_up(player: player, game: str, verbose: bool):
-  if power_ups and player.power_ups_choices["double_up"] == game:
+  if power_ups and player.power_ups_choices["double_edged_sword"] == game:
     if verbose:
       print(player.name + " used double up")
-    return "double_up"
-  if power_ups and player.power_ups_choices["safety_net"] == game:
-    if verbose:
-      print(player.name + " used safety net")
-    return "safety_net"
+    return "double_edged_sword"
   return "none"
 
+def mutate_win_chances(win_chances: dict, power_up_chances: dict):
+  mutated_win_chances = copy.deepcopy(win_chances)
+  for player in power_up_chances:
+    mutate_win_probabilities = [(game, power_up_chances[player]["accounting_error"][game]) for game in power_up_chances[player]["accounting_error"]]
+    chosen_game = pick_from_probabilities(mutate_win_probabilities)
+    mutated_win_chances[player][chosen_game] = mutated_win_chances[player][chosen_game] * accounting_error_win_boost_factor
+  return mutated_win_chances
 
 def do_turn(game: str, players: list, verbose: bool):
   if verbose:
@@ -178,7 +178,6 @@ def do_turn(game: str, players: list, verbose: bool):
 
   # Add points to players
   for player in players:
-    check_gamba_points(player, game, first, verbose)
     if player.name == first:
       player.add_points(score(1, check_if_power_up(player, game, verbose)))
     if player.name == second:
@@ -195,19 +194,24 @@ def do_turn(game: str, players: list, verbose: bool):
     print("First:", first, "| Second:", second, "| Third:", third, "| Fourth:", fourth, "| Fifth:", fifth)
 
 def simulate_tournament(win_chances: dict, power_up_chances: dict, verbose: bool = False):
+  mutated_win_chances = mutate_win_chances(win_chances, power_up_chances)
+
   players = [
-    player("jakob", win_chances["jakob"], power_up_chances["jakob"]), 
-    player("jorgen", win_chances["jorgen"], power_up_chances["jorgen"]), 
-    player("tobias", win_chances["tobias"], power_up_chances["tobias"]), 
-    player("william", win_chances["william"], power_up_chances["william"]),
-    player("kristin", win_chances["kristin"], power_up_chances["kristin"])
+    player("jakob", mutated_win_chances["jakob"], crystal_ballin_win_chance["jakob"], power_up_chances["jakob"]), 
+    player("jorgen", mutated_win_chances["jorgen"], crystal_ballin_win_chance["jorgen"], power_up_chances["jorgen"]), 
+    player("tobias", mutated_win_chances["tobias"], crystal_ballin_win_chance["tobias"], power_up_chances["tobias"]), 
+    player("william", mutated_win_chances["william"], crystal_ballin_win_chance["william"], power_up_chances["william"]),
+    player("kristin", mutated_win_chances["kristin"], crystal_ballin_win_chance["kristin"], power_up_chances["kristin"])
   ]
-  
+
+  for player_looked_at in players:
+    check_crystal_ballin_points(player_looked_at, verbose)
+
   for game in games:
     do_turn(game, players, verbose)
     if verbose:
+      print("Point scores after " + game + ":")
       for p in players:
-        print("Point scores after " + game + ":")
         print(p)
 
   return players
@@ -266,15 +270,15 @@ def optimize_power_ups(power_up_chances: dict, simulation_player: str ):
   power_up_combinations = []
 
   # Construct list of all valid combinations of powerup choices by the player
-  for double_up_game in games:
-    if game_chosen_by[double_up_game] != simulation_player:
-      for safety_net_game in games:
-        if game_chosen_by[safety_net_game] != simulation_player:
-          for gamba_time_game in games:
-            if game_chosen_by[gamba_time_game] != simulation_player:
+  for double_edged_sword_game in games:
+    if game_chosen_by[double_edged_sword_game] != simulation_player:
+      for crystal_ballin_game in games:
+        if game_chosen_by[crystal_ballin_game] != simulation_player:
+          for accounting_error_game in games:
+            if game_chosen_by[accounting_error_game] != simulation_player:
               for person in people:
-                if person != simulation_player and game_chosen_by[gamba_time_game] != person and len(set([double_up_game, safety_net_game, gamba_time_game])) == 3:
-                  power_up_combinations.append({"double_up": {double_up_game: 1}, "safety_net": {safety_net_game: 1}, "gamba_time": {gamba_time_game: [1, person]}})
+                if person != simulation_player and game_chosen_by[accounting_error_game] != person and len(set([double_edged_sword_game, crystal_ballin_game, accounting_error_game])) == 3:
+                  power_up_combinations.append({"double_edged_sword": {double_edged_sword_game: 1}, "crystal_ballin": {crystal_ballin_game: 1}, "accounting_error": {accounting_error_game: [1, person]}})
 
   print("Number of combinations:", len(power_up_combinations), "\nnumber of simulations:", simulations, "\ntotal number of simulations:", len(power_up_combinations) * simulations)
 
