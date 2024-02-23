@@ -2,7 +2,7 @@ import random
 import copy
 
 # CONFIG
-simulations = 100000
+simulations = 10000
 verbose = False
 power_ups = True
 accounting_error_win_boost_factor = 1.1
@@ -61,11 +61,11 @@ game_chosen_by = {
 # JAKOB
 
 win_chances = {
-  "jakob":   {"world_of_warcraft": 20, "battleblock_theater": 3, "kerbal_space_program": 90, "geoguessr": 20, "jump_king": 2, "planet_coaster": 40, "war_thunder": 70, "hollow_knight": 2, "pummel_party": 15, "pubg": 6},
-  "jorgen":  {"world_of_warcraft": 10, "battleblock_theater": 1, "kerbal_space_program": 2, "geoguessr": 70, "jump_king": 2, "planet_coaster": 50, "war_thunder": 1, "hollow_knight": 0.1, "pummel_party": 5, "pubg": 1},
-  "tobias":  {"world_of_warcraft": 10, "battleblock_theater": 25, "kerbal_space_program": 6, "geoguessr": 4, "jump_king": 85, "planet_coaster": 5, "war_thunder": 25, "hollow_knight": 2, "pummel_party": 60, "pubg": 6},
-  "william": {"world_of_warcraft": 50, "battleblock_theater": 1, "kerbal_space_program": 0, "geoguessr": 6, "jump_king": 5, "planet_coaster": 0, "war_thunder": 2, "hollow_knight": 0.2, "pummel_party": 5, "pubg": 80},
-  "kristin": {"world_of_warcraft": 10, "battleblock_theater": 65, "kerbal_space_program": 0.5, "geoguessr": 0, "jump_king": 6, "planet_coaster": 5, "war_thunder": 2, "hollow_knight": 95, "pummel_party": 15, "pubg": 7}
+  "jakob":   {"world_of_warcraft": 20, "battleblock_theater": 3, "kerbal_space_program": 600, "geoguessr": 20, "jump_king": 3, "planet_coaster": 50, "war_thunder": 60, "hollow_knight": 15, "pummel_party": 15, "pubg": 15},
+  "jorgen":  {"world_of_warcraft": 15, "battleblock_theater": 1, "kerbal_space_program": 1, "geoguessr": 70, "jump_king": 2, "planet_coaster": 40, "war_thunder": 13, "hollow_knight": 3, "pummel_party": 5, "pubg": 2},
+  "tobias":  {"world_of_warcraft": 10, "battleblock_theater": 60, "kerbal_space_program": 6, "geoguessr": 4, "jump_king": 91, "planet_coaster": 5, "war_thunder": 25, "hollow_knight": 45, "pummel_party": 60, "pubg": 8},
+  "william": {"world_of_warcraft": 40, "battleblock_theater": 1, "kerbal_space_program": 0, "geoguessr": 6, "jump_king": 1, "planet_coaster": 0, "war_thunder": 0.5, "hollow_knight": 2, "pummel_party": 5, "pubg": 65},
+  "kristin": {"world_of_warcraft": 15, "battleblock_theater": 35, "kerbal_space_program": 1.5, "geoguessr": 0, "jump_king": 3, "planet_coaster": 5, "war_thunder": 1.5, "hollow_knight": 35, "pummel_party": 15, "pubg": 10}
 }
 
 power_up_chances = {
@@ -272,13 +272,9 @@ def optimize_power_ups(power_up_chances: dict, simulation_player: str ):
   # Construct list of all valid combinations of powerup choices by the player
   for double_edged_sword_game in games:
     if game_chosen_by[double_edged_sword_game] != simulation_player:
-      for crystal_ballin_game in games:
-        if game_chosen_by[crystal_ballin_game] != simulation_player:
-          for accounting_error_game in games:
-            if game_chosen_by[accounting_error_game] != simulation_player:
-              for person in people:
-                if person != simulation_player and game_chosen_by[accounting_error_game] != person and len(set([double_edged_sword_game, crystal_ballin_game, accounting_error_game])) == 3:
-                  power_up_combinations.append({"double_edged_sword": {double_edged_sword_game: 1}, "crystal_ballin": {crystal_ballin_game: 1}, "accounting_error": {accounting_error_game: [1, person]}})
+        for accounting_error_game in games:
+          if double_edged_sword_game != accounting_error_game:
+            power_up_combinations.append({"double_edged_sword": {double_edged_sword_game: 1}, "accounting_error": {accounting_error_game: 1}})
 
   print("Number of combinations:", len(power_up_combinations), "\nnumber of simulations:", simulations, "\ntotal number of simulations:", len(power_up_combinations) * simulations)
 
@@ -290,9 +286,10 @@ def optimize_power_ups(power_up_chances: dict, simulation_player: str ):
     power_up_chances = {
       # TODO generate this dynamically based on simulation_player
       simulation_player: combo,
-      "jakob": power_up_chances["jakob"], 
+      "william": power_up_chances["william"], 
       "jorgen": power_up_chances["jorgen"], 
-      "tobias": power_up_chances["tobias"]
+      "tobias": power_up_chances["tobias"],
+      "kristin": power_up_chances["kristin"]
     }
     run_wins, run_point_averages = simulationRun(False, win_chances, power_up_chances, simulations)
     results.append({"win_distribution": run_wins, "point_averages": run_point_averages, "power_up_combo": combo})
@@ -308,3 +305,5 @@ def optimize_power_ups(power_up_chances: dict, simulation_player: str ):
   print("\n------------------------------------------\n")
 
 simulationRun(True, win_chances, power_up_chances, simulations)
+  
+#optimize_power_ups(power_up_chances, "jakob")
